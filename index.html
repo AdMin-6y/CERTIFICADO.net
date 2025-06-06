@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Verificador de Certificados Profesionales</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts & Font Awesome for icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            color: #222;
+        }
+        header {
+            background: #1a237e;
+            color: #fff;
+            padding: 30px 0 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+        nav {
+            margin-top: 10px;
+        }
+        nav a {
+            color: #fff;
+            margin: 0 18px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 40px auto 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(30,40,90,0.08);
+            padding: 40px 30px 30px 30px;
+            display: flex;
+            gap: 40px;
+        }
+        .main-content {
+            flex: 2;
+        }
+        .sidebar {
+            flex: 1;
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 25px 20px;
+            box-shadow: 0 2px 8px rgba(30,40,90,0.04);
+        }
+        .verifier-box {
+            background: #e3e7f1;
+            border-radius: 10px;
+            padding: 30px 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(30,40,90,0.04);
+        }
+        .verifier-box h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: #1a237e;
+        }
+        .verifier-box input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            border: 1px solid #b0bec5;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            margin-right: 10px;
+        }
+        .verifier-box button {
+            background: #1a237e;
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .verifier-box button:hover {
+            background: #3949ab;
+        }
+        .certificate-result {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .certificate-result img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 24px rgba(30,40,90,0.12);
+        }
+        .authentic {
+            color: #388e3c;
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 25px 0 15px 0;
+            letter-spacing: 1px;
+        }
+        .login-prompt {
+            margin-top: 20px;
+            font-size: 1.1rem;
+        }
+        .login-prompt button {
+            background: #ffb300;
+            color: #222;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        /* Auth Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(30,40,90,0.25);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 35px 30px 25px 30px;
+            border-radius: 10px;
+            width: 350px;
+            box-shadow: 0 4px 24px rgba(30,40,90,0.18);
+            position: relative;
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: #1a237e;
+            text-align: center;
+        }
+        .modal-content label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        .modal-content input[type="text"],
+        .modal-content input[type="password"] {
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #b0bec5;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 1rem;
+        }
+        .modal-content button {
+            margin-top: 22px;
+            width: 100%;
+            background: #1a237e;
+            color: #fff;
+            border: none;
+            padding: 11px 0;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+        .modal-content .close {
+            position: absolute;
+            right: 18px;
+            top: 15px;
+            font-size: 1.3rem;
+            color: #888;
+            cursor: pointer;
+        }
+        .modal-content .switch-auth {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.98rem;
+        }
+        .modal-content .switch-auth a {
+            color: #3949ab;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .error-msg {
+            color: #d32f2f;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .download-btn {
+            background: #388e3c;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 18px;
+            transition: background 0.2s;
+        }
+        .download-btn:hover {
+            background: #2e7031;
+        }
+        /* Sidebar */
+        .sidebar h3 {
+            color: #1a237e;
+            margin-top: 0;
+        }
+        .sidebar ul {
+            padding-left: 18px;
+        }
+        .sidebar li {
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+        }
+        .sidebar .fa {
+            color: #3949ab;
+            margin-right: 7px;
+        }
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                padding: 20px 8px;
+            }
+            .sidebar {
+                margin-top: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fa fa-certificate"></i> Verificador de Certificados</h1>
+        <nav>
+            <a href="#">Inicio</a>
+            <a href="#">Verificar Certificado</a>
+            <a href="#">Artículos</a>
+            <a href="#">Contacto</a>
+        </nav>
+    </header>
+    <div class="container">
+        <div class="main-content">
+            <div class="verifier-box">
+                <h2><i class="fa fa-search"></i> Verifica tu certificado</h2>
+                <form id="verifyForm" autocomplete="off">
+                    <input type="text" id="certNumber" placeholder="Ingrese el número de certificado" required>
+                    <button type="submit"><i class="fa fa-check"></i> Verificar</button>
+                </form>
+                <div id="certificateResult" class="certificate-result"></div>
+            </div>
+            <section>
+                <h2>¿Por qué son importantes los certificados?</h2>
+                <p>
+                    Los certificados profesionales son una herramienta clave para validar conocimientos y habilidades en distintas áreas. 
+                    <b>¡Aumentan la confianza de empleadores y clientes!</b>
+                </p>
+                <h3>Datos curiosos sobre certificados</h3>
+                <ul>
+                    <li><b>El primer certificado digital</b> fue emitido en 1995 para asegurar transacciones en internet.</li>
+                    <li>En algunos países, los certificados digitales tienen la misma validez legal que una firma manuscrita.</li>
+                    <li>Más del 70% de los empleadores consideran los certificados como un factor decisivo al contratar.</li>
+                    <li>Los certificados ayudan a combatir la falsificación de títulos y credenciales.</li>
+                    <li>La tecnología blockchain está revolucionando la autenticidad de los certificados.</li>
+                </ul>
+            </section>
+        </div>
+        <aside class="sidebar">
+            <h3><i class="fa fa-lightbulb"></i> Artículos destacados</h3>
+            <ul>
+                <li><i class="fa fa-shield-alt"></i> <a href="#">¿Cómo verificar la autenticidad de un certificado?</a></li>
+                <li><i class="fa fa-user-graduate"></i> <a href="#">Beneficios de certificar tus conocimientos</a></li>
+                <li><i class="fa fa-globe"></i> <a href="#">Certificados digitales vs. físicos</a></li>
+                <li><i class="fa fa-lock"></i> <a href="#">La seguridad en la emisión de certificados</a></li>
+            </ul>
+            <h3><i class="fa fa-info-circle"></i> Curiosidades</h3>
+            <ul>
+                <li>El certificado más antiguo conocido es de la Universidad de Bolonia, emitido en 1158.</li>
+                <li>Algunos certificados digitales incluyen tecnología QR para verificación instantánea.</li>
+            </ul>
+        </aside>
+    </div>
+
+    <!-- Modal de Login/Register -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h3 id="authTitle">Iniciar Sesión</h3>
+            <form id="authForm" autocomplete="off">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" required>
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" required>
+                <button type="submit" id="authBtn">Entrar</button>
+                <div class="error-msg" id="authError"></div>
+            </form>
+            <div class="switch-auth" id="switchAuth">
+                ¿No tienes cuenta? <a id="toRegister">Crear cuenta</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de usuario permitido
+        const allowedUser = {
+            username: "Jefferson Rodriguez",
+            password: "mugiwara623"
+        };
+
+        // Estado de autenticación
+        let isAuthenticated = false;
+
+        // Mostrar certificado si es válido
+        function showCertificate(certNumber) {
+            const resultDiv = document.getElementById('certificateResult');
+            resultDiv.innerHTML = '';
+            if(certNumber.trim().toUpperCase() === "3Y2D9H-OPC08-G56RV") {
+                let html = `
+                    <div class="authentic"><i class="fa fa-check-circle"></i> ¡Certificado Auténtico!</div>
+                    <img src="CERTIFICADO2.jpg" alt="Certificado" />
+                `;
+                if(isAuthenticated) {
+                    html += `<a href="CERTIFICADO2.jpg" download="CERTIFICADO_Jefferson_Steven_Rodriguez_Mendez.jpg">
+                                <button class="download-btn"><i class="fa fa-download"></i> Descargar Certificado</button>
+                             </a>`;
+                } else {
+                    html += `<div class="login-prompt">
+                                Para descargar el certificado debes iniciar sesión.
+                                <button onclick="openAuthModal('login')"><i class="fa fa-user"></i> Iniciar Sesión</button>
+                             </div>`;
+                }
+                resultDiv.innerHTML = html;
+            } else {
+                resultDiv.innerHTML = `<div style="color:#d32f2f;font-size:1.3rem;margin-top:20px;">
+                    <i class="fa fa-times-circle"></i> Certificado no encontrado.
+                </div>`;
+            }
+        }
+
+        // Formulario de verificación
+        document.getElementById('verifyForm').addEventListener('submit', function(e){
+            e.preventDefault();
+            const certNumber = document.getElementById('certNumber').value;
+            showCertificate(certNumber);
+        });
+
+        // Modal de autenticación
+        const authModal = document.getElementById('authModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const authForm = document.getElementById('authForm');
+        const authTitle = document.getElementById('authTitle');
+        const authBtn = document.getElementById('authBtn');
+        const authError = document.getElementById('authError');
+        const switchAuth = document.getElementById('switchAuth');
+        const toRegister = document.getElementById('toRegister');
+        let isLoginMode = true;
+
+        function openAuthModal(mode) {
+            isLoginMode = (mode === 'login');
+            authTitle.textContent = isLoginMode ? "Iniciar Sesión" : "Crear Cuenta";
+            authBtn.textContent = isLoginMode ? "Entrar" : "Crear Cuenta";
+            switchAuth.innerHTML = isLoginMode
+                ? '¿No tienes cuenta? <a id="toRegister">Crear cuenta</a>'
+                : '¿Ya tienes cuenta? <a id="toLogin">Iniciar sesión</a>';
+            authError.textContent = '';
+            authForm.reset();
+            authModal.style.display = 'flex';
+            setTimeout(() => {
+                // Reasignar eventos a enlaces dinámicos
+                document.getElementById(isLoginMode ? 'toRegister' : 'toLogin').onclick = () => openAuthModal(isLoginMode ? 'register' : 'login');
+            }, 50);
+        }
+        window.openAuthModal = openAuthModal;
+
+        closeModalBtn.onclick = () => authModal.style.display = 'none';
+        window.onclick = function(event) {
+            if (event.target === authModal) authModal.style.display = "none";
+        };
+
+        // Login/Register
+        authForm.onsubmit = function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            if(isLoginMode) {
+                if(username === allowedUser.username && password === allowedUser.password) {
+                    isAuthenticated = true;
+                    authModal.style.display = 'none';
+                    // Si ya se mostró el certificado, refrescar para mostrar botón de descarga
+                    const certNumber = document.getElementById('certNumber').value;
+                    if(certNumber.trim().toUpperCase() === "3Y2D9H-OPC08-G56RV") {
+                        showCertificate(certNumber);
+                    }
+                } else {
+                    authError.textContent = "Usuario o contraseña incorrectos.";
+                }
+            } else {
+                // Solo permitir crear la cuenta correcta
+                if(username === allowedUser.username && password === allowedUser.password) {
+                    isAuthenticated = true;
+                    authModal.style.display = 'none';
+                    const certNumber = document.getElementById('certNumber').value;
+                    if(certNumber.trim().toUpperCase() === "3Y2D9H-OPC08-G56RV") {
+                        showCertificate(certNumber);
+                    }
+                } else {
+                    authError.textContent = "Solo puedes crear la cuenta oficial para este certificado.";
+                }
+            }
+        };
+
+        // Inicializar enlaces de cambio de modo
+        switchAuth.onclick = function(e) {
+            if(e.target.id === 'toRegister') openAuthModal('register');
+            if(e.target.id === 'toLogin') openAuthModal('login');
+        };
+    </script>
+</body>
+</html>
