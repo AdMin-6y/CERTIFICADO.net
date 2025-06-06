@@ -93,11 +93,6 @@
             margin-top: 30px;
             text-align: center;
         }
-        .certificate-result img {
-            max-width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 4px 24px rgba(30,40,90,0.12);
-        }
         .authentic {
             color: #388e3c;
             font-size: 2.2rem;
@@ -230,9 +225,19 @@
                 margin-top: 30px;
             }
         }
+        /* Bloquear selección y arrastre */
+        .no-select, .certificate-canvas {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        .certificate-canvas {
+            pointer-events: none;
+        }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
     <header>
         <h1><i class="fa fa-certificate"></i> Verificador de Certificados</h1>
         <nav>
@@ -304,13 +309,12 @@
     </div>
 
     <script>
-        // Datos de usuario permitido
+        // Usuario permitido
         const allowedUser = {
-            username: "Jefferson Rodriguez",
+            username: "Jefferson R",
             password: "mugiwara623"
         };
 
-        // Estado de autenticación
         let isAuthenticated = false;
 
         // Mostrar certificado si es válido
@@ -318,21 +322,34 @@
             const resultDiv = document.getElementById('certificateResult');
             resultDiv.innerHTML = '';
             if(certNumber.trim().toUpperCase() === "3Y2D9H-OPC08-G56RV") {
-                let html = `
-                    <div class="authentic"><i class="fa fa-check-circle"></i> ¡Certificado Auténtico!</div>
-                    <img src="CERTIFICADO2.jpg" alt="Certificado" />
-                `;
+                let html = `<div class="authentic no-select"><i class="fa fa-check-circle"></i> ¡Certificado Auténtico!</div>`;
                 if(isAuthenticated) {
-                    html += `<a href="CERTIFICADO2.jpg" download="CERTIFICADO_Jefferson_Steven_Rodriguez_Mendez.jpg">
-                                <button class="download-btn"><i class="fa fa-download"></i> Descargar Certificado</button>
-                             </a>`;
+                    html += `<canvas id="certCanvas" width="1200" height="670" class="certificate-canvas" style="max-width:100%;border-radius:10px;box-shadow:0 4px 24px rgba(30,40,90,0.12);"></canvas>
+                    <br>
+                    <a href="CERTIFICADO2.jpg" download="CERTIFICADO_Jefferson_R.jpg">
+                        <button class="download-btn"><i class="fa fa-download"></i> Descargar Certificado</button>
+                    </a>`;
                 } else {
-                    html += `<div class="login-prompt">
-                                Para descargar el certificado debes iniciar sesión.
-                                <button onclick="openAuthModal('login')"><i class="fa fa-user"></i> Iniciar Sesión</button>
-                             </div>`;
+                    html += `<div class="no-select" style="margin:30px 0 20px 0;">
+                        <i class="fa fa-lock fa-3x" style="color:#1a237e"></i>
+                        <div style="font-size:1.2rem;margin-top:10px;">Debes iniciar sesión para ver y descargar el certificado.</div>
+                    </div>
+                    <div class="login-prompt">
+                        <button onclick="openAuthModal('login')"><i class="fa fa-user"></i> Iniciar Sesión</button>
+                    </div>`;
                 }
                 resultDiv.innerHTML = html;
+                if(isAuthenticated) {
+                    // Renderizar imagen en canvas para evitar copiar/descargar fácilmente
+                    const img = new window.Image();
+                    img.onload = function() {
+                        const canvas = document.getElementById('certCanvas');
+                        const ctx = canvas.getContext('2d');
+                        ctx.clearRect(0,0,canvas.width,canvas.height);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    };
+                    img.src = "CERTIFICADO2.jpg";
+                }
             } else {
                 resultDiv.innerHTML = `<div style="color:#d32f2f;font-size:1.3rem;margin-top:20px;">
                     <i class="fa fa-times-circle"></i> Certificado no encontrado.
@@ -369,7 +386,6 @@
             authForm.reset();
             authModal.style.display = 'flex';
             setTimeout(() => {
-                // Reasignar eventos a enlaces dinámicos
                 document.getElementById(isLoginMode ? 'toRegister' : 'toLogin').onclick = () => openAuthModal(isLoginMode ? 'register' : 'login');
             }, 50);
         }
@@ -389,7 +405,6 @@
                 if(username === allowedUser.username && password === allowedUser.password) {
                     isAuthenticated = true;
                     authModal.style.display = 'none';
-                    // Si ya se mostró el certificado, refrescar para mostrar botón de descarga
                     const certNumber = document.getElementById('certNumber').value;
                     if(certNumber.trim().toUpperCase() === "3Y2D9H-OPC08-G56RV") {
                         showCertificate(certNumber);
@@ -398,7 +413,6 @@
                     authError.textContent = "Usuario o contraseña incorrectos.";
                 }
             } else {
-                // Solo permitir crear la cuenta correcta
                 if(username === allowedUser.username && password === allowedUser.password) {
                     isAuthenticated = true;
                     authModal.style.display = 'none';
@@ -417,6 +431,11 @@
             if(e.target.id === 'toRegister') openAuthModal('register');
             if(e.target.id === 'toLogin') openAuthModal('login');
         };
+
+        // Bloquear arrastrar imagen/canvas
+        document.addEventListener('dragstart', function(e) {
+            if(e.target.classList.contains('certificate-canvas')) e.preventDefault();
+        });
     </script>
 </body>
 </html>
